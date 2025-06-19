@@ -330,14 +330,14 @@ ctx.shadowOffsetY = 2;
         </>
       )}
 
-      <canvas ref={canvasRef} className="border-4 border-cyan-400 mt-4 bg-black rounded-lg shadow-lg" w-full max-w-[360px] h-auto />
+     <canvas ref={canvasRef} className="border-4 border-cyan-400 mt-4 bg-black rounded-lg shadow-lg w-full max-w-[360px] h-auto"/>
+
       
-       {isMobile && hasStarted && !gameOver && (
+  {isMobile && hasStarted && !gameOver && (
   <div className="grid grid-cols-3 gap-2 max-w-xs w-full mt-4">
     <button
       onTouchStart={() => move(-1)}
-      className="bg-cyan-600 p-4 rounded-lg shadow active:scale-90"
-    >
+      className="bg-cyan-600 p-4 rounded-lg shadow active:scale-90">
       ◀️
     </button>
     <button
@@ -347,20 +347,17 @@ ctx.shadowOffsetY = 2;
           setCurrent(cur => ({ ...cur, shape: rotated }));
         }
       }}
-      className="bg-cyan-600 p-4 rounded-lg shadow active:scale-90"
-    >
+      className="bg-cyan-600 p-4 rounded-lg shadow active:scale-90">
       ⟳
     </button>
     <button
       onTouchStart={() => move(1)}
-      className="bg-cyan-600 p-4 rounded-lg shadow active:scale-90"
-    >
+      className="bg-cyan-600 p-4 rounded-lg shadow active:scale-90">
       ▶️
     </button>
     <button
       onTouchStart={moveDown}
-      className="col-span-3 bg-cyan-600 p-4 rounded-lg shadow active:scale-90"
-    >
+      className="col-span-3 bg-cyan-600 p-4 rounded-lg shadow active:scale-90">
       ⬇️
     </button>
   </div>
