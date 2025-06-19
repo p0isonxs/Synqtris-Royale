@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Session, Model, View } from "@croquet/croquet";
 
 const ROWS = 20;
 const COLS = 10;
@@ -41,36 +40,6 @@ function rotate(matrix) {
   return result;
 }
 
-class SynqtrisModel extends Model {
-  init() {
-    this.players = {};
-    this.future(100, "tick");
-  }
-  tick() {
-    this.publish("tetris", "sync", this.players);
-    this.future(100, "tick");
-  }
-}
-
-class SynqtrisView extends View {
-  constructor(model) {
-    super(model);
-    const { username, setOpponentBoard } = model.options;
-    model.subscribe("tetris", "sync", (data) => {
-      const opponent = Object.entries(data).find(([name]) => name !== username);
-      if (opponent) {
-        const [, payload] = opponent;
-        setOpponentBoard(payload.grid);
-      }
-    });
-  }
-}
-
-function getRoomName() {
-  const params = new URLSearchParams(window.location.search);
-  return params.get("room") || "default-room";
-}
-
 function SynqtrisGame() {
   const canvasRef = useRef(null);
   const [grid, setGrid] = useState(Array.from({ length: ROWS }, () => Array(COLS).fill(0)));
@@ -81,7 +50,6 @@ function SynqtrisGame() {
   const [gameOver, setGameOver] = useState(false);
   const [username, setUsername] = useState("");
   const [hasStarted, setHasStarted] = useState(false);
-  const [opponentBoard, setOpponentBoard] = useState([]);
   const SUPABASE_URL = "https://drvegjjbjxryogrxrhpz.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRydmVnampianhyeW9ncnhyaHB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAzMzEyNzIsImV4cCI6MjA2NTkwNzI3Mn0._UMUfA4sxx96oA7d4h9YwgUo1ZpZZOnLgQxgOgrxO68";
 
@@ -89,19 +57,6 @@ const [leaderboard, setLeaderboard] = useState([]);
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(true);
 
   useEffect(() => {
-    Session.join({
-      appId: "com.synqtris.royale",
-      apiKey: "2oYvftXOLAkGHVrD8I5vXFPd5TgMiECskoXSGe16Xk",
-      name: getRoomName(),
-      password: "default",
-      model: SynqtrisModel,
-      view: SynqtrisView,
-      options: {
-        username,
-        setOpponentBoard
-      }
-    });
-
     const fetchLeaderboard = () => {
       fetch(`${SUPABASE_URL}/rest/v1/scores?select=*&order=score.desc&limit=5`, {
         headers: {
@@ -193,9 +148,6 @@ const [leaderboard, setLeaderboard] = useState([]);
       const linesCleared = clearLines(newGrid);
       setScore(prev => prev + linesCleared * 100);
       setGrid(newGrid);
-      Session?.publish?.("tetris", "sync", {
-        [username]: { grid: newGrid, score }
-      });
       const next = getRandomTetromino();
       if (!canMove(next.shape, 3, 0)) {
         setGameOver(true);
@@ -330,25 +282,9 @@ ctx.shadowOffsetY = 2;
   return (
     <div className="flex flex-col items-center min-h-screen bg-gradient-to-b from-black via-indigo-900 to-purple-950 text-white font-mono">
       <h1 className="text-4xl font-extrabold my-6 tracking-wide bg-gradient-to-r from-cyan-300 via-purple-400 to-pink-500 text-transparent bg-clip-text drop-shadow-md">Synqtris Royale</h1>
-      <div className="flex gap-2 items-center mb-2">
-  <button
-    onClick={() => {
-      const room = Math.random().toString(36).substring(2, 8);
-      const url = `${window.location.origin}?room=${room}`;
-      navigator.clipboard.writeText(url).then(() => {
-        alert("Room invite link copied to clipboard:
-" + url);
-      });
-    }}
-    className="bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-500 text-sm"
-  >
-    🔗 Create Room
-  </button>
-  <p className="text-sm text-gray-300">
-    Room: <span className="font-mono">{getRoomName()}</span>
-  </p>
-</div>
-<input
+      {!hasStarted && (
+        <div className="mb-4">
+          <input
             type="text"
             placeholder="Enter username"
             value={username}
@@ -380,20 +316,6 @@ ctx.shadowOffsetY = 2;
       )}
 
       <canvas ref={canvasRef} className="border-4 border-cyan-400 mt-4 bg-black rounded-lg shadow-lg" />
-
-      {opponentBoard.length > 0 && (
-        <div className="mt-8">
-          <h3 className="text-md font-semibold mb-2 text-cyan-400">👾 Opponent Board</h3>
-          <div className="grid grid-cols-10 gap-[1px] bg-gray-700 w-fit">
-            {opponentBoard.flat().map((cell, idx) => (
-              <div
-                key={idx}
-                className={`w-4 h-4 ${cell ? 'bg-cyan-400' : 'bg-gray-800'}`}
-              ></div>
-            ))}
-          </div>
-        </div>
-      )}
 
       <div className="mt-6 w-full max-w-xs">
         <h2 className="text-lg font-semibold mb-2">🏆 Leaderboard</h2>
