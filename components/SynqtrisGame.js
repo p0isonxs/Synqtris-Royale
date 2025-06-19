@@ -330,26 +330,25 @@ ctx.shadowOffsetY = 2;
   return (
     <div className="flex flex-col items-center min-h-screen bg-gradient-to-b from-black via-indigo-900 to-purple-950 text-white font-mono">
       <h1 className="text-4xl font-extrabold my-6 tracking-wide bg-gradient-to-r from-cyan-300 via-purple-400 to-pink-500 text-transparent bg-clip-text drop-shadow-md">Synqtris Royale</h1>
-      {$1
-          <div className="flex gap-2 items-center mb-2">
-            <button
-              onClick={() => {
-                const room = Math.random().toString(36).substring(2, 8);
-                const url = `${window.location.origin}?room=${room}`;
-                navigator.clipboard.writeText(url).then(() => {
-                  alert("Room invite link copied to clipboard:
+      <div className="flex gap-2 items-center mb-2">
+  <button
+    onClick={() => {
+      const room = Math.random().toString(36).substring(2, 8);
+      const url = `${window.location.origin}?room=${room}`;
+      navigator.clipboard.writeText(url).then(() => {
+        alert("Room invite link copied to clipboard:
 " + url);
-                });
-              }}
-              className="bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-500 text-sm"
-            >
-              🔗 Create Room
-            </button>
-            <p className="text-sm text-gray-300">
-              Room: <span className="font-mono">{getRoomName()}</span>
-            </p>
-          </div>
-          <input
+      });
+    }}
+    className="bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-500 text-sm"
+  >
+    🔗 Create Room
+  </button>
+  <p className="text-sm text-gray-300">
+    Room: <span className="font-mono">{getRoomName()}</span>
+  </p>
+</div>
+<input
             type="text"
             placeholder="Enter username"
             value={username}
