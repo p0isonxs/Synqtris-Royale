@@ -94,7 +94,20 @@ const [leaderboard, setLeaderboard] = useState([]);
     };
   }, [gameOver, hasStarted]);
 
-    
+    <canvas ref={canvasRef} className="border-4 border-cyan-400 mt-4 bg-black rounded-lg shadow-lg" />
+
+{/* mobile control buttons */}
+{isMobile && hasStarted && !gameOver && (
+  <div className="grid grid-cols-3 gap-2 max-w-xs w-full mt-4">
+    <button onTouchStart={() => move(-1)} className="bg-cyan-600 p-4 rounded-lg shadow active:scale-90">◀️</button>
+    <button onTouchStart={() => {
+      const rotated = rotate(current.shape);
+      if (canMove(rotated, position.x, position.y)) setCurrent(cur => ({ ...cur, shape: rotated }));
+    }} className="bg-cyan-600 p-4 rounded-lg shadow active:scale-90">⟳</button>
+    <button onTouchStart={() => move(1)} className="bg-cyan-600 p-4 rounded-lg shadow active:scale-90">▶️</button>
+    <button onTouchStart={moveDown} className="col-span-3 bg-cyan-600 p-4 rounded-lg shadow active:scale-90">⬇️</button>
+  </div>
+)}
 
   useEffect(() => {
     if (!gameOver && hasStarted) moveDown();
@@ -354,20 +367,5 @@ ctx.shadowOffsetY = 2;
     </div>
   );
 }
-
-<canvas ref={canvasRef} className="border-4 border-cyan-400 mt-4 bg-black rounded-lg shadow-lg" />
-
-{/* mobile control buttons */}
-{isMobile && hasStarted && !gameOver && (
-  <div className="grid grid-cols-3 gap-2 max-w-xs w-full mt-4">
-    <button onTouchStart={() => move(-1)} className="bg-cyan-600 p-4 rounded-lg shadow active:scale-90">◀️</button>
-    <button onTouchStart={() => {
-      const rotated = rotate(current.shape);
-      if (canMove(rotated, position.x, position.y)) setCurrent(cur => ({ ...cur, shape: rotated }));
-    }} className="bg-cyan-600 p-4 rounded-lg shadow active:scale-90">⟳</button>
-    <button onTouchStart={() => move(1)} className="bg-cyan-600 p-4 rounded-lg shadow active:scale-90">▶️</button>
-    <button onTouchStart={moveDown} className="col-span-3 bg-cyan-600 p-4 rounded-lg shadow active:scale-90">⬇️</button>
-  </div>
-)}
 
 export default SynqtrisGame;
