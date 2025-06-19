@@ -50,6 +50,15 @@ function SynqtrisGame() {
   const [gameOver, setGameOver] = useState(false);
   const [username, setUsername] = useState("");
   const [hasStarted, setHasStarted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   const SUPABASE_URL = "https://drvegjjbjxryogrxrhpz.supabase.co";
   const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRydmVnampianhyeW9ncnhyaHB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAzMzEyNzIsImV4cCI6MjA2NTkwNzI3Mn0._UMUfA4sxx96oA7d4h9YwgUo1ZpZZOnLgQxgOgrxO68";
 
@@ -321,7 +330,41 @@ ctx.shadowOffsetY = 2;
         </>
       )}
 
-      <canvas ref={canvasRef} className="border-4 border-cyan-400 mt-4 bg-black rounded-lg shadow-lg" />
+      <canvas ref={canvasRef} className="border-4 border-cyan-400 mt-4 bg-black rounded-lg shadow-lg" w-full max-w-[360px] h-auto />
+      
+       {isMobile && hasStarted && !gameOver && (
+  <div className="grid grid-cols-3 gap-2 max-w-xs w-full mt-4">
+    <button
+      onTouchStart={() => move(-1)}
+      className="bg-cyan-600 p-4 rounded-lg shadow active:scale-90"
+    >
+      ◀️
+    </button>
+    <button
+      onTouchStart={() => {
+        const rotated = rotate(current.shape);
+        if (canMove(rotated, position.x, position.y)) {
+          setCurrent(cur => ({ ...cur, shape: rotated }));
+        }
+      }}
+      className="bg-cyan-600 p-4 rounded-lg shadow active:scale-90"
+    >
+      ⟳
+    </button>
+    <button
+      onTouchStart={() => move(1)}
+      className="bg-cyan-600 p-4 rounded-lg shadow active:scale-90"
+    >
+      ▶️
+    </button>
+    <button
+      onTouchStart={moveDown}
+      className="col-span-3 bg-cyan-600 p-4 rounded-lg shadow active:scale-90"
+    >
+      ⬇️
+    </button>
+  </div>
+)}
 
       <div className="mt-6 w-full max-w-xs">
         <h2 className="text-lg font-semibold mb-2">🏆 Leaderboard</h2>
