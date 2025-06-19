@@ -66,6 +66,11 @@ class SynqtrisView extends View {
   }
 }
 
+function getRoomName() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("room") || "default-room";
+}
+
 function SynqtrisGame() {
   const canvasRef = useRef(null);
   const [grid, setGrid] = useState(Array.from({ length: ROWS }, () => Array(COLS).fill(0)));
@@ -87,7 +92,7 @@ const [leaderboard, setLeaderboard] = useState([]);
     Session.join({
       appId: "com.synqtris.royale",
       apiKey: "2oYvftXOLAkGHVrD8I5vXFPd5TgMiECskoXSGe16Xk",
-      name: "room-1",
+      name: getRoomName(),
       password: "default",
       model: SynqtrisModel,
       view: SynqtrisView,
