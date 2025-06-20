@@ -74,6 +74,10 @@ function SynqtrisGame() {
   const [username, setUsername] = useState("");
   const [hasStarted, setHasStarted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [blinkingRows, setBlinkingRows] = useState([]);
+  const [comboFX, setComboFX] = useState({ message: "", key: 0 });
+
+
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -333,17 +337,23 @@ if (e.key === "ArrowLeft") {
   for (let y = 0; y < ROWS; y++) {
     for (let x = 0; x < COLS; x++) {
       if (grid[y][x]) {
-        // Gunakan gradient + glow juga di blok grid (tidak cuma solid)
         const color = grid[y][x];
-        const grad = ctx.createLinearGradient(
-          x * BLOCK_SIZE, y * BLOCK_SIZE,
-          (x + 1) * BLOCK_SIZE, (y + 1) * BLOCK_SIZE
-        );
-        grad.addColorStop(0, "#fff3"); // highlight di pojok
-        grad.addColorStop(0.6, color);
-        grad.addColorStop(1, "#0002");
-        ctx.fillStyle = grad;
         ctx.save();
+        // Baris yang sedang blink
+        if (blinkingRows.includes(y)) {
+          ctx.globalAlpha = 0.2 + 0.6 * Math.abs(Math.sin(Date.now() / 80)); // animasi blinking
+          ctx.fillStyle = "#fff";
+        } else {
+          // Gunakan gradient + glow juga di blok grid (tidak cuma solid)
+          const grad = ctx.createLinearGradient(
+            x * BLOCK_SIZE, y * BLOCK_SIZE,
+            (x + 1) * BLOCK_SIZE, (y + 1) * BLOCK_SIZE
+          );
+          grad.addColorStop(0, "#fff3"); // highlight di pojok
+          grad.addColorStop(0.6, color);
+          grad.addColorStop(1, "#0002");
+          ctx.fillStyle = grad;
+        }
         ctx.shadowColor = color;
         ctx.shadowBlur = 10;
         ctx.fillRect(
@@ -369,6 +379,7 @@ if (e.key === "ArrowLeft") {
     }
   }
 }
+
 
 
   function drawTetromino(ctx, shape, offsetX, offsetY, color, isGhost = false) {
@@ -473,6 +484,44 @@ if (e.key === "ArrowLeft") {
   }
 }
 
+  
+  
+  function clearLines(currentGrid) {
+  let linesCleared = 0;
+  let cleared = [];
+  for (let y = ROWS - 1; y >= 0; y--) {
+    if (currentGrid[y].every(cell => cell)) {
+      cleared.push(y);
+      linesCleared++;
+    }
+  }
+
+  // ---- COMBO FX PATCH START ----
+  if (cleared.length > 0) {
+    // FX Message logic
+    let message = "";
+    if (cleared.length === 4) message = "TETRIS!";
+    else if (cleared.length === 3) message = "TRIPLE!";
+    else if (cleared.length === 2) message = "DOUBLE!";
+    if (message) {
+      setComboFX(prev => ({ message, key: prev.key + 1 }));
+      setTimeout(() => setComboFX(prev => ({ ...prev, message: "" })), 950);
+    }
+    // ---- COMBO FX PATCH END ----
+
+    setBlinkingRows(cleared);
+    setTimeout(() => {
+      for (const y of cleared) {
+        currentGrid.splice(y, 1);
+        currentGrid.unshift(Array(COLS).fill(0));
+      }
+      setBlinkingRows([]);
+      setGrid(currentGrid);
+    }, 180);
+    return linesCleared;
+  }
+  return 0;
+}
 
 
 
@@ -491,18 +540,7 @@ if (e.key === "ArrowLeft") {
     return true;
   }
 
-  function clearLines(currentGrid) {
-    let linesCleared = 0;
-    for (let y = ROWS - 1; y >= 0; y--) {
-      if (currentGrid[y].every(cell => cell)) {
-        currentGrid.splice(y, 1);
-        currentGrid.unshift(Array(COLS).fill(0));
-        linesCleared++;
-        y++;
-      }
-    }
-    return linesCleared;
-  }
+  
 
   function resetGame() {
     setGrid(Array.from({ length: ROWS }, () => Array(COLS).fill(0)));
@@ -515,6 +553,7 @@ if (e.key === "ArrowLeft") {
   }
 
   return (
+
     <div className="flex flex-col items-center min-h-screen bg-gradient-to-b from-black via-indigo-900 to-purple-950 text-white font-mono">
       <h1 className="text-4xl font-extrabold my-6 tracking-wide bg-gradient-to-r from-cyan-300 via-purple-400 to-pink-500 text-transparent bg-clip-text drop-shadow-md">Synqtris Royale</h1>
       {!hasStarted && (
@@ -546,6 +585,39 @@ if (e.key === "ArrowLeft") {
         onRestart={resetGame}
       />
 
+      {comboFX.message && (
+        <div
+          key={comboFX.key}
+          className="pointer-events-none select-none absolute left-1/2 top-1/2 z-40"
+          style={{
+            transform: 'translate(-50%, -240px)', // geser ke tengah board
+            width: '100%',
+            textAlign: 'center',
+            userSelect: 'none',
+            fontFamily: 'inherit',
+          }}
+        >
+          <span
+            className={`
+              text-6xl font-extrabold
+              ${comboFX.message === "P0ISONX!" ? "text-yellow-300 drop-shadow-lg" : ""}
+              ${comboFX.message === "TRIPLE!" ? "text-pink-400 drop-shadow-lg" : ""}
+              ${comboFX.message === "DOUBLE!" ? "text-cyan-300 drop-shadow" : ""}
+              animate-bounce-in-out
+            `}
+            style={{
+              letterSpacing: "2px",
+              textShadow: "0 4px 32px #fff8, 0 0 64px #ffd70088",
+              opacity: comboFX.message ? 1 : 0,
+              transition: "opacity .2s",
+            }}
+          >
+            {comboFX.message}
+          </span>
+        </div>
+)}
+
+      
      <canvas ref={canvasRef} className="border-4 border-cyan-400 mt-4 bg-black rounded-lg shadow-lg w-full max-w-[360px] h-auto"/>
 
       {isMobile && hasStarted && !gameOver && (
