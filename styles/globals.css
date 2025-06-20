@@ -2,6 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes bounce-in-out {
+  0% { opacity: 0; transform: scale(0.8) translateY(-40px);}
+  30% { opacity: 1; transform: scale(1.1) translateY(0);}
+  70% { opacity: 1; transform: scale(1) translateY(0);}
+  100% { opacity: 0; transform: scale(0.6) translateY(40px);}
+}
+.animate-bounce-in-out {
+  animation: bounce-in-out 0.95s both cubic-bezier(0.5,1.5,0.3,1);
+}
+
+
 body {
   @apply bg-black text-white font-mono;
 }
